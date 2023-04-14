@@ -1,15 +1,31 @@
-import {square} from './models.js'
+import { drawPolygon } from "./js/functions/drawPolygon/drawPolygon.js"
+import { toMesh } from "./js/functions/toMesh/toMesh.js"
+import { toPoint } from "./js/functions/toPoint/toPoint.js"
+import { toPolygon } from "./js/functions/toPolygon/toPolygon.js"
+import { square } from "./js/models/square.js"
+import { doubleSquare } from './js/models/doubleSquare.js'
+import { perspective } from "./js/functions/camera/perspective/perspective.js"
+import { offsetToCenter } from "./js/functions/utils/offsetToCenter/offsetToCenter.js"
+import { zoom } from "./js/functions/camera/zoom/zoom.js"
+import {camera} from './js/functions/camera/camera/camera.js'
 
-function toPoint(values) {
-    return {
-        x: values[0],
-        y: values[1],
-        z: values[2]
-    }
-}
+const canvas = document.querySelector("canvas")
 
-const canvas = document.querySelector('canvas')
+const context = canvas.getContext("2d")
 
-const context = canvas.getContext('2d')
+//console.log(square.map(shape=>shape.map(toPoint)))
+// console.log(square.map(toPolygon))
 
-console.log(square.map(shape=>shape.map(toPoint)))
+const mesh = toMesh(doubleSquare)
+
+//const cam = camera(100, 8)
+context.strokeStyle = "#fff"
+mesh.forEach((polygon) => {
+    drawPolygon(context)(
+        polygon
+            //.map((point) => perspective(point, 100))
+            //.map((point) => zoom(point, 8))
+            .map(point => camera(100, 8)(point))
+            .map(point => offsetToCenter(point, context.canvas))
+    )
+})
