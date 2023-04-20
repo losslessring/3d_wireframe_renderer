@@ -9,7 +9,7 @@ import { perspective } from "./js/functions/camera/perspective/perspective.js"
 import { offsetToCenter } from "./js/functions/utils/offsetToCenter/offsetToCenter.js"
 import { zoom } from "./js/functions/camera/zoom/zoom.js"
 import { camera } from "./js/functions/camera/camera/camera.js"
-import { offset } from './js/functions/utils/offset/offset.js'
+import { move } from './js/functions/utils/move/move.js'
 import { rotate } from './js/functions/utils/rotate/rotate.js'
 
 
@@ -28,11 +28,8 @@ const drawMesh = rotation => offsetPosition => cameraWithDistanceAndZoom => mesh
     mesh.forEach((polygon) => {
         drawPolygon(context)(
             polygon
-                //.map((point) => perspective(point, 100))
-                //.map((point) => zoom(point, 8))
-                //.map((point) => camera(200, 12)(point))
                 .map(point => rotate(point, rotation))
-                .map(point => offset(point, offsetPosition))
+                .map(point => move(point, offsetPosition))
                 .map((point) => cameraWithDistanceAndZoom(point))
                 .map((point) => offsetToCenter(point, context.canvas))
         )
@@ -45,9 +42,9 @@ const animate = (accumulator, increment) => (time) => {
     const cameraDistance = 200
     const perspCamera = camera(cameraDistance, 12)
     const offsetPosition = {x: Math.sin(time / 300) * 80, y: Math.sin(time / 1000) * 30, z: 0}
-    const rotation = {x: 0, y: accumulator, z: 0}
+    const rotation = {x: accumulator, y: 0, z: 0}
 
-    drawMesh(rotation)({x:0, y: 0, z: 0})(perspCamera)(mesh)
+    drawMesh(rotation)(offsetPosition)(perspCamera)(mesh)
     requestAnimationFrame(animate(accumulator + increment, increment))
 }
 
