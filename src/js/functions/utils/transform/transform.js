@@ -1,6 +1,6 @@
 export const transform = (transformFunction) => (mesh) => {
-    mesh.forEach((polygon) => {
-        polygon
+    return mesh.map((polygon) => {
+        return polygon
             .map((point) => transformFunction(point))
     })
 }

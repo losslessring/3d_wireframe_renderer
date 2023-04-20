@@ -9,43 +9,47 @@ import { perspective } from "./js/functions/camera/perspective/perspective.js"
 import { offsetToCenter } from "./js/functions/utils/offsetToCenter/offsetToCenter.js"
 import { zoom } from "./js/functions/camera/zoom/zoom.js"
 import { camera } from "./js/functions/camera/camera/camera.js"
-import { move } from './js/functions/utils/move/move.js'
-import { rotate } from './js/functions/utils/rotate/rotate.js'
-
+import { move } from "./js/functions/utils/move/move.js"
+import { rotate } from "./js/functions/utils/rotate/rotate.js"
+import { transform } from "./js/functions/utils/transform/transform.js"
 
 const canvas = document.querySelector("canvas")
 
 const context = canvas.getContext("2d")
 
-
 const mesh = toMesh(cube)
-
 
 context.strokeStyle = "#fff"
 
-
-const drawMesh = rotation => offsetPosition => cameraWithDistanceAndZoom => mesh => {
+const drawMesh = (cameraWithDistanceAndZoom) => (mesh) => {
     mesh.forEach((polygon) => {
         drawPolygon(context)(
             polygon
-                .map(point => rotate(point, rotation))
-                .map(point => move(point, offsetPosition))
                 .map((point) => cameraWithDistanceAndZoom(point))
                 .map((point) => offsetToCenter(point, context.canvas))
         )
     })
 }
 
-
-const animate = (accumulator, increment) => (time) => {
+const animate = (accumulator, increment) => (mesh) => (time) => {
     context.clearRect(0, 0, canvas.width, canvas.height)
+
     const cameraDistance = 200
     const perspCamera = camera(cameraDistance, 12)
-    const offsetPosition = {x: Math.sin(time / 300) * 80, y: Math.sin(time / 1000) * 30, z: 0}
-    const rotation = {x: accumulator, y: 0, z: 0}
 
-    drawMesh(rotation)(offsetPosition)(perspCamera)(mesh)
-    requestAnimationFrame(animate(accumulator + increment, increment))
+    const offsetPosition = {
+        x: Math.sin(time / 300) * 80,
+        y: Math.sin(time / 1000) * 30,
+        z: 0,
+    }
+    const rotation = { x: 0, y: accumulator, z: 0 }
+
+    const rotatedMesh = transform(rotate(rotation))(mesh)
+    const movedMesh = transform(move(offsetPosition))(rotatedMesh)
+    const transformedMesh = movedMesh
+
+    drawMesh(perspCamera)(transformedMesh)
+    requestAnimationFrame(animate(accumulator + increment, increment)(mesh))
 }
 
-animate(0, 0.1)()
+animate(0, 0.1)(mesh)()

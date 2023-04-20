@@ -1,4 +1,4 @@
-export const rotate = (point, rotation) => {
+export const rotate = (rotation) => (point) => {
     const transformYZ = (point) => {
         return {
             x: point.x,
