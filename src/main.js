@@ -9,41 +9,46 @@ import { perspective } from "./js/functions/camera/perspective/perspective.js"
 import { offsetToCenter } from "./js/functions/utils/offsetToCenter/offsetToCenter.js"
 import { zoom } from "./js/functions/camera/zoom/zoom.js"
 import { camera } from "./js/functions/camera/camera/camera.js"
+import { offset } from './js/functions/utils/offset/offset.js'
+import { rotate } from './js/functions/utils/rotate/rotate.js'
+
 
 const canvas = document.querySelector("canvas")
 
 const context = canvas.getContext("2d")
 
-//console.log(square.map(shape=>shape.map(toPoint)))
-// console.log(square.map(toPolygon))
 
 const mesh = toMesh(cube)
 
-//const cam = camera(100, 8)
+
 context.strokeStyle = "#fff"
 
-//const perspCamera = camera(200, 12)
 
-const drawMesh = cameraWithDistanceAndZoom => mesh => {
+const drawMesh = rotation => offsetPosition => cameraWithDistanceAndZoom => mesh => {
     mesh.forEach((polygon) => {
         drawPolygon(context)(
             polygon
                 //.map((point) => perspective(point, 100))
                 //.map((point) => zoom(point, 8))
                 //.map((point) => camera(200, 12)(point))
+                .map(point => rotate(point, rotation))
+                .map(point => offset(point, offsetPosition))
                 .map((point) => cameraWithDistanceAndZoom(point))
                 .map((point) => offsetToCenter(point, context.canvas))
         )
     })
 }
 
-//drawMesh(perspCamera)(mesh)
 
-const animate = (accumulator, increment) => () => {
+const animate = (accumulator, increment) => (time) => {
     context.clearRect(0, 0, canvas.width, canvas.height)
-    const perspCamera = camera(accumulator, 12)
-    drawMesh(perspCamera)(mesh)
+    const cameraDistance = 200
+    const perspCamera = camera(cameraDistance, 12)
+    const offsetPosition = {x: Math.sin(time / 300) * 80, y: Math.sin(time / 1000) * 30, z: 0}
+    const rotation = {x: 0, y: accumulator, z: 0}
+
+    drawMesh(rotation)({x:0, y: 0, z: 0})(perspCamera)(mesh)
     requestAnimationFrame(animate(accumulator + increment, increment))
 }
 
-animate(200, 0.1)()
+animate(0, 0.1)()
